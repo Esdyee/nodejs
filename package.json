@@ -18,6 +18,7 @@
   "homepage": "https://gitlab.com/joimh7/nodejs#readme",
   "dependencies": {
     "body-parser": "^1.20.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mongodb": "^3.6.4"
   }
 }
