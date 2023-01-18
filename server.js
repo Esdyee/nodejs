@@ -1,6 +1,9 @@
 const express = require("express");
 const app = express();
+
+//express 문법 시작
 app.use(express.urlencoded({ extended: true })); // 이해할 필요 X 이렇게 쓰라고 되어있을뿐
+app.set("view engine", "ejs");
 
 
 const MongoClient = require("mongodb").MongoClient;
@@ -39,6 +42,17 @@ app.post("/add", (req, res) => {
 	res.send("success!");
 	console.log(req.body);
 });
+
+//list 조회
+app.get("/list", (req, res) => {
+	db.collection("post").find().toArray((err, result) => {
+		console.log(result);
+		res.render("list.ejs", { posts: result });
+	});
+});
+
+
+
 
 // 데이터 insert
 function insertData(title, date) {
