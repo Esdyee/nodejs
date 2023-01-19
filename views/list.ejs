@@ -52,7 +52,13 @@
 			},
 		}).done(function (data) {
 			// hide deleted parent li tag
-			$(`li[data-id=${id}]`).hide();
+			$(`li[data-id=${id}]`).fadeOut();
+			alert(data.message);
+		}).fail(function (xhr, status, error) {
+			console.log(JSON.parse(xhr.responseText));
+			console.log(status);
+			console.log(error);
+			alert(JSON.parse(xhr.responseText).message);
 		});
 	}
 

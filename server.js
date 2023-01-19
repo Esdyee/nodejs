@@ -57,13 +57,15 @@ app.delete("/delete", (req, res) => {
 
 	let intId = parseInt(id);
 
-	// db.collection("post").deleteOne(
-	// 	{ _id: intId },
-	// 	(err, result) => {
-	// 		if (err) return console.log(err);
-	// 		console.log("삭제완료");
-	// 		res.send("success");
-	// 	});
+	db.collection("post").deleteOne(
+		{ _id: intId },
+		(err, result) => {
+			if (err) return console.log(err);
+			console.log("삭제완료");
+			// res.status(200).send({ message: "success" });
+
+			res.status(400).send({ message: "fail" });
+		});
 
 });
 
