@@ -49,6 +49,24 @@ app.get("/list", (req, res) => {
 	});
 });
 
+app.delete("/delete", (req, res) => {
+	// get ajax data
+	const { id } = req.body;
+	console.log(id);
+	console.log(req.body);
+
+	let intId = parseInt(id);
+
+	// db.collection("post").deleteOne(
+	// 	{ _id: intId },
+	// 	(err, result) => {
+	// 		if (err) return console.log(err);
+	// 		console.log("삭제완료");
+	// 		res.send("success");
+	// 	});
+
+});
+
 
 
 
