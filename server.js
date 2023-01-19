@@ -22,7 +22,6 @@ MongoClient.connect(dbInfo, function (err, client) {
 });
 
 
-
 app.get("/pet", (req, res) => {
 	res.send("Hello World!@@@");
 });
@@ -40,7 +39,6 @@ app.post("/add", (req, res) => {
 	const date = new Date();
 	insertData(title, date);
 	res.send("success!");
-	console.log(req.body);
 });
 
 //list 조회
@@ -55,8 +53,36 @@ app.get("/list", (req, res) => {
 
 
 // 데이터 insert
-function insertData(title, date) {
-	db.collection('post').insertOne({title: title, date: date}, (err, result) => {
-		console.log("저장완료");
-	});
+async function insertData(title, date) {
+	const postCount = await autoIncrement("post-count");
+	console.log(postCount);
+
+	db.collection("post")
+		.insertOne({
+			_id: postCount + 1,
+			title: title,
+			date: date
+		}, (err, result) => {
+			db.collection("counter")
+				.updateOne(
+					{name: "post-count"},
+					{$inc: {totalPost: 1}},
+					(err, result) => {
+						console.log("counter update");
+					});
+
+			console.log("저장완료");
+		});
 }
+
+function autoIncrement(name) {
+	return new Promise(function(resolve, reject) {
+		db.collection("counter").findOne({ name: name }, (err, result) => {
+			console.log(result.totalPost);
+			resolve(result.totalPost);
+			reject(err);
+		});
+	})
+}
+
+
