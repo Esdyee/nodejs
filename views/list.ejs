@@ -1,6 +1,11 @@
 <!doctype html>
 <html>
 <head>
+	<style>
+		.list-group-item{
+			cursor: pointer;
+		}
+	</style>
 	<!-- Required meta tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -31,7 +36,8 @@
 
 <ul class="list-group">
 	<% for (let i = 0; i < posts.length; i++) {%>
-	<li data-id="<%=posts[i]._id%>" class="list-group-item">
+	<li data-id="<%=posts[i]._id%>" class="list-group-item"
+		onclick="detailPost(<%=posts[i]._id%>)">
 		<h4>할일 제목 : <%=posts[i].title%> </h4>
 		<p>할일 날짜 : <%=posts[i].date%> </p>
 		<button onclick="deletePost(<%=posts[i]._id%>)" class="btn btn-danger">삭제</button>
@@ -60,6 +66,13 @@
 			console.log(error);
 			alert(JSON.parse(xhr.responseText).message);
 		});
+	}
+
+	// detail page
+	function detailPost(id) {
+		console.log(id);
+		//move to detail page
+		location.href = `/detail/${id}`;
 	}
 
 </script>

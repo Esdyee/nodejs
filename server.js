@@ -69,8 +69,20 @@ app.delete("/delete", (req, res) => {
 
 });
 
+//detail
+app.get("/detail/:id", (req, res) => {
+	db.collection("post").findOne({ _id: parseInt(req.params.id) }, (err, result) => {
+		if(!result) {
+			return res.status(404).render("not-find.ejs");
+		}
+		res.render("detail.ejs", { post: result });
+	});
+});
 
-
+// 404 에러 처리
+app.use(function (req, res, next) {
+	res.status(404).render("not-find.ejs");
+});
 
 // 데이터 insert
 async function insertData(title, date) {
