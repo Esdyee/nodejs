@@ -5,6 +5,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true })); // 이해할 필요 X 이렇게 쓰라고 되어있을뿐
 app.set("view engine", "ejs");
 
+//css middleware
+app.use('/public', express.static("public"));
 
 const MongoClient = require("mongodb").MongoClient;
 
@@ -27,11 +29,13 @@ app.get("/pet", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-	res.sendFile(__dirname + "/index.html");
+	// res.sendFile(__dirname + "/index.html");
+	res.render("index.ejs");
 });
 
 app.get("/write", (req, res) => {
-	res.sendFile(__dirname + "/write.html");
+	// res.sendFile(__dirname + "/write.html");
+	res.render("write.ejs");
 });
 
 app.post("/add", (req, res) => {
