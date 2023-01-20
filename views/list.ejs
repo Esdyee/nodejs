@@ -21,12 +21,14 @@
 
 <ul class="list-group">
 	<% for (let i = 0; i < posts.length; i++) {%>
-	<li data-id="<%=posts[i]._id%>" class="list-group-item"
-		onclick="detailPost(<%=posts[i]._id%>)">
-		<p>No : <%=posts[i]._id%></p>
-		<h4>할일 제목 : <%=posts[i].title%> </h4>
-		<p>할일 날짜 : <%=posts[i].date%> </p>
+	<li data-id="<%=posts[i]._id%>" class="list-group-item">
+		<div onclick="detailPost(<%=posts[i]._id%>)">
+			<p>No : <%=posts[i]._id%></p>
+			<h4>할일 제목 : <%=posts[i].title%> </h4>
+			<p>할일 날짜 : <%=posts[i].date%> </p>
+		</div>
 		<button onclick="deletePost(<%=posts[i]._id%>)" class="btn btn-danger">삭제</button>
+		<button onclick="updatePost(<%=posts[i]._id%>)" class="btn btn-primary">수정</button>
 	</li>
 	<% } %>
 </ul>
@@ -61,6 +63,11 @@
 		location.href = `/detail/${id}`;
 	}
 
+	function updatePost(id) {
+		console.log(id);
+		//move to update page
+		location.href = `/update/${id}`;
+	}
 </script>
 
 <!-- Optional JavaScript; choose one of the two! -->

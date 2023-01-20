@@ -45,6 +45,20 @@ app.post("/add", (req, res) => {
 	res.send("success!");
 });
 
+// data update
+app.post("/update", (req, res) => {
+	const {title, id, date} = req.body;
+	console.log(req.body);
+	db.collection("post")
+		.updateOne(
+			{_id: parseInt(id)},
+			{$set: {title: title, date: date}},
+			(err, result) => {
+				console.log("수정완료");
+				res.send("success!");
+			});
+});
+
 //list 조회
 app.get("/list", (req, res) => {
 	db.collection("post").find().toArray((err, result) => {
@@ -73,13 +87,21 @@ app.delete("/delete", (req, res) => {
 
 });
 
-//detail
+//detail page
 app.get("/detail/:id", (req, res) => {
 	db.collection("post").findOne({ _id: parseInt(req.params.id) }, (err, result) => {
 		if(!result) {
 			return res.status(404).render("not-find.ejs");
 		}
 		res.render("detail.ejs", { post: result });
+	});
+});
+
+//update page
+app.get("/update/:id", (req, res) => {
+	db.collection("post").findOne({ _id: parseInt(req.params.id) }, (err, result) => {
+		// console.log(result);
+		res.render("update.ejs", { post: result });
 	});
 });
 
