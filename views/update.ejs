@@ -13,7 +13,7 @@
 <body>
 
 <%- include("nav.html") %>
-<form onsubmit="return false">
+<form onsubmit="return false" action="/add?_method=PUT" method="POST">
   <input type="hidden" name="id" value="<%= post._id %>">
   <div class="form-group">
     <label>오늘의 할일</label>

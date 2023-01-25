@@ -9,6 +9,8 @@ app.set("view engine", "ejs");
 app.use('/public', express.static("public"));
 
 const MongoClient = require("mongodb").MongoClient;
+const methodOverride = require("method-override");
+app.use(methodOverride("_method"));
 
 const dbInfo = "mongodb+srv://sd0809:1212123@nestcluster.axt8d.mongodb.net/?retryWrites=true&w=majority"
 
@@ -55,7 +57,8 @@ app.post("/update", (req, res) => {
 			{$set: {title: title, date: date}},
 			(err, result) => {
 				console.log("수정완료");
-				res.send("success!");
+				// res.send("success!");
+				res.redirect("/list");
 			});
 });
 
