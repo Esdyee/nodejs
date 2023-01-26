@@ -5,6 +5,15 @@ const app = express();
 app.use(express.urlencoded({ extended: true })); // 이해할 필요 X 이렇게 쓰라고 되어있을뿐
 app.set("view engine", "ejs");
 
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const session = require("express-session");
+
+app.use(session({ secret: "비밀코드", resave: true, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 //css middleware
 app.use('/public', express.static("public"));
 
@@ -25,6 +34,53 @@ MongoClient.connect(dbInfo, function (err, client) {
 	});
 });
 
+
+app.get("/login", (req, res, next) => {
+	res.render("login.ejs");
+});
+
+//faukyreRedurect is CurrentPage Setting
+app.post("/login", passport.authenticate("local", {
+	failureRedirect: "/login",
+}), (req, res) => {
+	console.log("성공후 콜백");
+	res.redirect("/");
+});
+
+passport.use(new LocalStrategy({
+	usernameField: "id",
+	passwordField: "pw",
+	session: true,
+	// passReqToCallback: false
+}, (username, password, done) => {
+
+	db.collection("login").findOne({ id: username }, (err, result) => {
+		console.log(err, result, password, username);
+		if (err) return done(err);
+
+		if (!result) {
+			console.log("계정없음");
+			// send custom error message
+			return done(null, false, { message: "존재하지 않는 아이디입니다." });
+		}
+
+		if (result.pw !== password) {
+			console.log("비번틀림");
+			return done(null, false, {message: "비밀번호가 틀렸습니다."});
+		}
+		return done(null, result);
+	});
+}));
+
+//세션 저장시키는 코드
+passport.serializeUser((user, done) => {
+	done(null, user.id);
+});
+
+//이 세션 데이터를 가진 사람을 DB에서 찾아 올 때 싸는 코드
+passport.deserializeUser((id, done) => {
+	done(null, id);
+});
 
 app.get("/pet", (req, res) => {
 	res.send("Hello World!@@@");
