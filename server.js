@@ -8,8 +8,9 @@ app.set("view engine", "ejs");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const session = require("express-session");
+require("dotenv").config();
 
-app.use(session({ secret: "비밀코드", resave: true, saveUninitialized: false }));
+app.use(session({ secret: "비밀코드", resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -21,7 +22,7 @@ const MongoClient = require("mongodb").MongoClient;
 const methodOverride = require("method-override");
 app.use(methodOverride("_method"));
 
-const dbInfo = "mongodb+srv://sd0809:1212123@nestcluster.axt8d.mongodb.net/?retryWrites=true&w=majority"
+const dbInfo = process.env.DB_URL;
 
 let db;
 MongoClient.connect(dbInfo, function (err, client) {
@@ -29,7 +30,7 @@ MongoClient.connect(dbInfo, function (err, client) {
 	db = client.db('todoapp');
 
 	// 데이터 insert
-	app.listen(8080, () => {
+	app.listen(process.env.PORT, () => {
 		console.log("listening on 8080");
 	});
 });
@@ -72,6 +73,19 @@ passport.use(new LocalStrategy({
 	});
 }));
 
+app.get("/mypage", checkLogin, (req, res) => {
+	console.log(req.user);
+	res.render("mypage.ejs", { user: req.user });
+});
+
+function checkLogin(req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.send("로그인이 필요합니다.");
+	}
+}
+
 //세션 저장시키는 코드
 passport.serializeUser((user, done) => {
 	done(null, user.id);
@@ -79,7 +93,10 @@ passport.serializeUser((user, done) => {
 
 //이 세션 데이터를 가진 사람을 DB에서 찾아 올 때 싸는 코드
 passport.deserializeUser((id, done) => {
-	done(null, id);
+	db.collection("login").findOne({ id: id }, (err, result) => {
+		console.log("deserializeUser", id, result);
+		done(null, result);
+	});
 });
 
 app.get("/pet", (req, res) => {
@@ -123,6 +140,38 @@ app.get("/list", (req, res) => {
 	db.collection("post").find().toArray((err, result) => {
 		console.log(result);
 		res.render("list.ejs", { posts: result });
+	});
+});
+
+//search 기능
+app.get("/search", (req, res) => {
+	const {keyword} = req.query;
+
+	let query = {};
+	if(keyword) {
+		query = {title: {$regex: keyword}};
+	}
+
+	let aggregateParam = [
+		{
+			$search: {
+				index: "titleSearch",
+				text: {
+					query: keyword,
+					path: "title"
+				}
+			}
+		}
+	]
+
+	// db.collection("post").aggregate(aggregateParam).toArray((err, result) => {
+	// 	console.log(result);
+	// 	// res.render("search.ejs", { posts: result });
+	// });
+
+	db.collection("post").aggregate(aggregateParam).toArray((err, result) => {
+		console.log(result);
+		res.render("search.ejs", { posts: result });
 	});
 });
 
