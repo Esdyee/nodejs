@@ -99,6 +99,28 @@ passport.deserializeUser((id, done) => {
 	});
 });
 
+app.post("/register", (req, res) => {
+
+	// check if user exists
+	db.collection("login").findOne({
+		id: req.body.id
+	}, (err, result) => {
+		if (result) {
+			console.log("이미 존재하는 아이디입니다.");
+			res.send("이미 존재하는 아이디입니다.");
+		} else {
+			// create user
+			db.collection("login").insertOne({
+				id: req.body.id,
+				pw: req.body.pw,
+			}, (err, result) => {
+				console.log("회원가입완료");
+				res.redirect("/login");
+			});
+		}
+	})
+});
+
 app.get("/pet", (req, res) => {
 	res.send("Hello World!@@@");
 });
@@ -116,7 +138,8 @@ app.get("/write", (req, res) => {
 app.post("/add", (req, res) => {
 	const {title} = req.body;
 	const date = new Date();
-	insertData(title, date);
+	const userId = req.user._id;
+	insertData(title, date, userId);
 	res.send("success!");
 });
 
@@ -178,19 +201,25 @@ app.get("/search", (req, res) => {
 app.delete("/delete", (req, res) => {
 	// get ajax data
 	const { id } = req.body;
-	console.log(id);
-	console.log(req.body);
+	let deletedPost = { _id: parseInt(id), author: req.user._id };
 
-	let intId = parseInt(id);
+	console.log(deletedPost);
 
 	db.collection("post").deleteOne(
-		{ _id: intId },
+		deletedPost,
 		(err, result) => {
-			if (err) return console.log(err);
-			console.log("삭제완료");
-			// res.status(200).send({ message: "success" });
+			console.log("삭제처리진행");
+			if (err) {
+				res.status(400).send({ message: "fail" });
+				return console.log(err);
+			}
+			// console.log(result.deletedCount);
+			if (result.deletedCount === 0) {
+				res.status(400).send({ message: "no-data" });
+				return console.log("삭제할 데이터가 없습니다.");
+			}
+			res.status(200).send({ message: "success" });
 
-			res.status(400).send({ message: "fail" });
 		});
 
 });
@@ -219,7 +248,7 @@ app.use(function (req, res, next) {
 });
 
 // 데이터 insert
-async function insertData(title, date) {
+async function insertData(title, date, userId) {
 	const postCount = await autoIncrement("post-count");
 	console.log(postCount);
 
@@ -227,7 +256,8 @@ async function insertData(title, date) {
 		.insertOne({
 			_id: postCount + 1,
 			title: title,
-			date: date
+			date: date,
+			author: userId,
 		}, (err, result) => {
 			db.collection("counter")
 				.updateOne(
