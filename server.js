@@ -8,6 +8,30 @@ app.set("view engine", "ejs");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const session = require("express-session");
+const multer = require("multer");  // 이미지 업로드에 사용 됨
+
+//diskStorage : 디스크에 저장, memoryStorage : 메모리에 저장
+const uploadStorage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		console.log("file destination", file.originalname);
+		cb(null, "public/images"); // 파일이 저장될 경로
+	},
+	filename: function (req, file, cb) {
+		console.log("file name", file.originalname);
+		cb(null, file.originalname); // 저장한 이미지의 파일명 설정하는 부분
+	},
+});
+
+const upload = multer({
+	storage: uploadStorage,
+	fileFilter: function (req, file, cb) {
+		console.log("file filter", file.originalname);
+		if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+			return cb(new Error("Only image files are allowed!"), true);
+		}
+	}
+});
+
 require("dotenv").config();
 
 app.use(session({ secret: "비밀코드", resave: true}));
@@ -176,7 +200,7 @@ app.post("/update", (req, res) => {
 // });
 
 // use router with db
-app.use("/", checkLogin, require("./routes/post.js"));
+app.use("/", require("./routes/post.js"));
 
 //search 기능
 app.get("/search", (req, res) => {
@@ -249,6 +273,18 @@ app.get("/update/:id", (req, res) => {
 	});
 });
 
+app.get("/upload", (req, res) => {
+	res.render("upload.ejs");
+});
+
+app.post("/upload", upload.single("profile"), (req, res) => {
+	console.log(req.file);
+	res.send("success!");
+});
+
+
+
+
 // 404 에러 처리
 app.use(function (req, res, next) {
 	res.status(404).render("not-find.ejs");
@@ -289,12 +325,3 @@ function autoIncrement(name) {
 }
 
 
-// MongoClient.connect(dbInfo, function (err, client) {
-// 	console.log(err);
-// 	db = client.db('todoapp');
-//
-// 	// 데이터 insert
-// 	app.listen(process.env.PORT, () => {
-// 		console.log("listening on 8080");
-// 	});
-// });
