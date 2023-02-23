@@ -35,6 +35,15 @@ MongoClient.connect(dbInfo, function (err, client) {
 	});
 });
 
+// export db connect
+module.exports = {
+	app,
+	db,
+	getDb: () => {
+		return db;
+	}
+};
+
 
 app.get("/login", (req, res, next) => {
 	res.render("login.ejs");
@@ -159,12 +168,15 @@ app.post("/update", (req, res) => {
 });
 
 //list 조회
-app.get("/list", (req, res) => {
-	db.collection("post").find().toArray((err, result) => {
-		console.log(result);
-		res.render("list.ejs", { posts: result });
-	});
-});
+// app.get("/list", (req, res) => {
+// 	db.collection("post").find().toArray((err, result) => {
+// 		console.log(result);
+// 		res.render("list.ejs", { posts: result });
+// 	});
+// });
+
+// use router with db
+app.use("/", checkLogin, require("./routes/post.js"));
 
 //search 기능
 app.get("/search", (req, res) => {
@@ -186,11 +198,6 @@ app.get("/search", (req, res) => {
 			}
 		}
 	]
-
-	// db.collection("post").aggregate(aggregateParam).toArray((err, result) => {
-	// 	console.log(result);
-	// 	// res.render("search.ejs", { posts: result });
-	// });
 
 	db.collection("post").aggregate(aggregateParam).toArray((err, result) => {
 		console.log(result);
@@ -282,3 +289,12 @@ function autoIncrement(name) {
 }
 
 
+// MongoClient.connect(dbInfo, function (err, client) {
+// 	console.log(err);
+// 	db = client.db('todoapp');
+//
+// 	// 데이터 insert
+// 	app.listen(process.env.PORT, () => {
+// 		console.log("listening on 8080");
+// 	});
+// });
