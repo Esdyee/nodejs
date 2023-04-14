@@ -13,11 +13,9 @@ const multer = require("multer");  // 이미지 업로드에 사용 됨
 //diskStorage : 디스크에 저장, memoryStorage : 메모리에 저장
 const uploadStorage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		console.log("file destination", file.originalname);
 		cb(null, "public/images"); // 파일이 저장될 경로
 	},
 	filename: function (req, file, cb) {
-		console.log("file name", file.originalname);
 		cb(null, file.originalname); // 저장한 이미지의 파일명 설정하는 부분
 	},
 });
@@ -25,7 +23,6 @@ const uploadStorage = multer.diskStorage({
 const upload = multer({
 	storage: uploadStorage,
 	fileFilter: function (req, file, cb) {
-		console.log("file filter", file.originalname);
 		if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
 			return cb(new Error("Only image files are allowed!"), true);
 		}
@@ -50,7 +47,6 @@ const dbInfo = process.env.DB_URL;
 
 let db;
 MongoClient.connect(dbInfo, function (err, client) {
-	console.log(err);
 	db = client.db('todoapp');
 
 	// 데이터 insert
@@ -77,7 +73,6 @@ app.get("/login", (req, res, next) => {
 app.post("/login", passport.authenticate("local", {
 	failureRedirect: "/login",
 }), (req, res) => {
-	console.log("성공후 콜백");
 	res.redirect("/");
 });
 
@@ -89,17 +84,14 @@ passport.use(new LocalStrategy({
 }, (username, password, done) => {
 
 	db.collection("login").findOne({ id: username }, (err, result) => {
-		console.log(err, result, password, username);
 		if (err) return done(err);
 
 		if (!result) {
-			console.log("계정없음");
 			// send custom error message
 			return done(null, false, { message: "존재하지 않는 아이디입니다." });
 		}
 
 		if (result.pw !== password) {
-			console.log("비번틀림");
 			return done(null, false, {message: "비밀번호가 틀렸습니다."});
 		}
 		return done(null, result);
@@ -107,7 +99,6 @@ passport.use(new LocalStrategy({
 }));
 
 app.get("/mypage", checkLogin, (req, res) => {
-	console.log(req.user);
 	res.render("mypage.ejs", { user: req.user });
 });
 
@@ -127,7 +118,6 @@ passport.serializeUser((user, done) => {
 //이 세션 데이터를 가진 사람을 DB에서 찾아 올 때 싸는 코드
 passport.deserializeUser((id, done) => {
 	db.collection("login").findOne({ id: id }, (err, result) => {
-		console.log("deserializeUser", id, result);
 		done(null, result);
 	});
 });
@@ -139,7 +129,6 @@ app.post("/register", (req, res) => {
 		id: req.body.id
 	}, (err, result) => {
 		if (result) {
-			console.log("이미 존재하는 아이디입니다.");
 			res.send("이미 존재하는 아이디입니다.");
 		} else {
 			// create user
@@ -147,7 +136,6 @@ app.post("/register", (req, res) => {
 				id: req.body.id,
 				pw: req.body.pw,
 			}, (err, result) => {
-				console.log("회원가입완료");
 				res.redirect("/login");
 			});
 		}
@@ -179,13 +167,11 @@ app.post("/add", (req, res) => {
 // data update
 app.post("/update", (req, res) => {
 	const {title, id, date} = req.body;
-	console.log(req.body);
 	db.collection("post")
 		.updateOne(
 			{_id: parseInt(id)},
 			{$set: {title: title, date: date}},
 			(err, result) => {
-				console.log("수정완료");
 				// res.send("success!");
 				res.redirect("/list");
 			});
@@ -198,6 +184,9 @@ app.post("/update", (req, res) => {
 // 		res.render("list.ejs", { posts: result });
 // 	});
 // });
+
+// chat router with db
+app.use("/chat", checkLogin, require("./routes/chat.js"));
 
 // use router with db
 app.use("/", require("./routes/post.js"));
@@ -224,7 +213,6 @@ app.get("/search", (req, res) => {
 	]
 
 	db.collection("post").aggregate(aggregateParam).toArray((err, result) => {
-		console.log(result);
 		res.render("search.ejs", { posts: result });
 	});
 });
@@ -234,12 +222,9 @@ app.delete("/delete", (req, res) => {
 	const { id } = req.body;
 	let deletedPost = { _id: parseInt(id), author: req.user._id };
 
-	console.log(deletedPost);
-
 	db.collection("post").deleteOne(
 		deletedPost,
 		(err, result) => {
-			console.log("삭제처리진행");
 			if (err) {
 				res.status(400).send({ message: "fail" });
 				return console.log(err);

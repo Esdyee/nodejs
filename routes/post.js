@@ -15,7 +15,6 @@ router.get("/list", (req, res) => {
 
 	// get data from db
 	db.collection("post").find().toArray((err, result) => {
-		console.log(result);
 		res.render("list.ejs", { posts: result });
 	});
 });

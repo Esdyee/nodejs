@@ -29,6 +29,7 @@
 		</div>
 		<button onclick="deletePost(<%=posts[i]._id%>)" class="btn btn-danger">삭제</button>
 		<button onclick="updatePost(<%=posts[i]._id%>)" class="btn btn-primary">수정</button>
+		<button onclick="chatPost(<%=posts[i]._id%>)" class="btn btn-primary">채팅</button>
 	</li>
 	<% } %>
 </ul>
@@ -67,6 +68,12 @@
 		console.log(id);
 		//move to update page
 		location.href = `/update/${id}`;
+	}
+
+	function chatPost(id) {
+		console.log(id);
+		//move to update page
+		location.href = `/chat/${id}`;
 	}
 </script>
 
