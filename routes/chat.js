@@ -40,4 +40,35 @@ router.post("/:postId", (req, res) => {
 	});
 })
 
+// get chat data from db
+router.get("/sse/:postId", (req, res) => {
+
+	res.writeHead(200, {
+		"Connection": "keep-alive",
+		"Content-Type": "text/event-stream",
+		"Cache-Control": "no-cache"
+	})
+
+	// 5초에 한번씩 메세지 보내기
+	setInterval(() => {
+
+
+		// res.write("data: " + "hello" + "\n\n");
+		const getDb = server.getDb;
+		const db = getDb();
+		const postId = Number(req.params.postId);
+
+		// get chat data from db
+		db.collection("chat").find({parentPostId: postId}).toArray((err, result) => {
+			res.write("event: test\n")
+			res.write("data: " + JSON.stringify(result) + "\n\n");
+		});
+
+	} , 5000);
+
+})
+
+
+
+
 module.exports = router;
