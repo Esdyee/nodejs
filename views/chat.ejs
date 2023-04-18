@@ -49,35 +49,6 @@
 			<% } %>
 		</ul>
 
-
-		<br/>
-		<br/>
-		<br/>
-
-		<!--<ul class="list-unstyled">
-			<li class="media">
-				<img src="https://via.placeholder.com/64x64" class="mr-3" alt="User Image">
-				<div class="media-body">
-					<h5 class="mt-0 mb-1">User Name</h5>
-					Hello, how are you?
-				</div>
-			</li>
-			<li class="media my-4">
-				<div class="media-body text-right">
-					<h5 class="mt-0 mb-1">Other User Name</h5>
-					I'm good, thanks for asking!
-				</div>
-				<img src="https://via.placeholder.com/64x64" class="ml-3" alt="Other User Image">
-			</li>
-			<li class="media">
-				<img src="https://via.placeholder.com/64x64" class="mr-3" alt="User Image">
-				<div class="media-body">
-					<h5 class="mt-0 mb-1">User Name</h5>
-					That's great to hear!
-				</div>
-			</li>
-		</ul>-->
-
 		<form action="/chat/<%=posts[0].parentPostId%>" method="post">
 			<div class="form-group">
 				<label for="content">Content</label>
@@ -92,8 +63,16 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
 
 <script>
+	$(document).ready(function () {
+		callSseChatList();
+	});
 
-
+	function callSseChatList() {
+		const eventSource = new EventSource("/chat/sse/<%=posts[0].parentPostId%>");
+		eventSource.addEventListener('test', function (e) {
+			console.log(JSON.parse(e.data));
+		});
+	}
 </script>
 
 <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
